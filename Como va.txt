@@ -1,0 +1,19 @@
+Funciona la parte de la API de:
+
+-- Clasificación (Alta, Baja, Modificar y buscar [Tambien filtrado])
+-- Usuario (Alta, Baja, editar, modificar y encriptar contraseña [con comentarios])
+-- Noticias (Alta, Baja, Mostrar Noticias [Tambien filtrado por autor])
+-- Login terminado
+-- Equipo (Alta, Baja, Modificar y buscar por id)
+-- Plantilla (Alta, Baja, Modificar por id y buscar por id)
+-- Tablas unidas entre sí.
+-- Iniciar Sesión y Registro
+-- Confirmacion de correo electronico
+-- Toast hecho, Todo el flujo de Registro, Inicio Sesion, Correo, etc hecho.
+-- Terminado el recuperar contraseña
+-- Formularios también acabado
+-- Trabajar en Vista de Administrador (Modificar y Borrar)
+-- El fichero Log
+-- La landing page
+-- Foto al iniciar sesion
+
