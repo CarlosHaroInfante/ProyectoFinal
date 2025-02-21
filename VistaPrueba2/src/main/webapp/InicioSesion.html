@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio de Sesión</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    async function loginUsuario(event) {
+      event.preventDefault();
+
+      // Recoger datos y quitar espacios en blanco
+      const correo = document.getElementById("correoUsuario").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      // Validar que ningún campo esté vacío
+      if (!correo || !password) {
+        Toastify({
+          text: "Por favor, completa todos los campos obligatorios.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+        return;
+      }
+
+      // Crear FormData para enviar los datos
+      const formData = new FormData();
+      formData.append("correoUsuario", correo);
+      formData.append("password", password);
+
+      console.log("Enviando login con correo:", correo);
+
+      try {
+        // Se envía la solicitud al servlet de Vista (no a la API directamente)
+        const res = await fetch("http://localhost:8080/VistaPrueba2/login", {
+          method: "POST",
+          body: formData
+        });
+        if (res.ok) {
+          const data = await res.json();
+          Toastify({
+            text: data.mensaje || "Inicio de sesión exitoso!",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#4CAF50"
+          }).showToast();
+          // Redirigir tras 3 segundos
+          setTimeout(() => {
+            window.location.href = "/VistaPrueba2/index.jsp";
+          }, 3000);
+        } else {
+          const errorData = await res.json();
+          Toastify({
+            text: errorData.error || "Error al iniciar sesión.",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#FF0000"
+          }).showToast();
+        }
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        Toastify({
+          text: "Error al iniciar sesión",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+      }
+    }
+
+    function removeError(event) {
+      event.target.classList.remove("border-red-500");
+      const errorEl = document.getElementById(event.target.id + "Error");
+      if (errorEl) {
+        errorEl.classList.add("hidden");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("loginForm").addEventListener("submit", loginUsuario);
+      document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", removeError);
+      });
+    });
+  </script>
+</head>
+<body  class="flex items-center justify-center min-h-screen">
+  <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
+    <!-- Título en amarillo -->
+    <h2 class="text-2xl font-bold text-yellow-500 mb-8">Iniciar Sesión</h2>
+    <!-- Se omite el atributo action para que fetch maneje la sumisión -->
+    <form id="loginForm" method="post" novalidate>
+      <div>
+        <!-- Label en amarillo -->
+        <label for="correoUsuario" class="block text-yellow-500 font-semibold mb-2">Correo</label>
+        <input 
+          type="email" 
+          name="correoUsuario" 
+          id="correoUsuario" 
+          class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" 
+          placeholder="Introduce tu correo" 
+          required>
+        <p class="text-red-500 text-sm mt-2 hidden" id="correoUsuarioError">Introduce un correo válido.</p>
+      </div>
+      <div>
+        <!-- Label en amarillo -->
+        <label for="password" class="block text-yellow-500 font-semibold mb-2">Contraseña</label>
+        <input 
+          type="password" 
+          name="password" 
+          id="password" 
+          class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" 
+          placeholder="Introduce tu contraseña" 
+          required>
+        <p class="text-red-500 text-sm mt-2 hidden" id="passwordError">Introduce tu contraseña.</p>
+      </div>
+      <br><br>
+      <!-- Enlace "¿Has olvidado tu contraseña?" en amarillo -->
+      <p class="text-center text-yellow-500 mt-4">
+        <a href="recuperacionContrasenia.html" class="font-semibold hover:text-yellow-600 transition-colors duration-300">
+          ¿Has olvidado tu contraseña?
+        </a>
+      </p>
+      <br><br>
+      <!-- Botón en amarillo -->
+      <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-semibold hover:bg-yellow-600">
+        Iniciar Sesión
+      </button>
+    </form>
+    <!-- Texto en blanco y enlace "Regístrate" en amarillo -->
+    <p class="text-center text-white mt-6">
+      ¿No tienes cuenta? 
+      <a href="nuevoUsuario.html" class="font-semibold text-yellow-500 hover:text-yellow-600">Regístrate</a>
+    </p>
+  </div>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</body>
+</html>
+

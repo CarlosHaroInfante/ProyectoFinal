@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actualizar Contraseña</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    async function actualizarContrasena(event) {
+      event.preventDefault();
+
+      // Extraer parámetros de la URL: correo y codigoVerificacion
+      const urlParams = new URLSearchParams(window.location.search);
+      const correo = urlParams.get('correo');
+      const token = urlParams.get('codigoVerificacion');  // Asegúrate de usar el nombre correcto
+      console.log("Correo extraído:", correo);
+      console.log("Token extraído:", token);
+
+      // Obtener las contraseñas del formulario
+      const nuevaPassword = document.getElementById("nuevaPassword").value.trim();
+      const confirmarPassword = document.getElementById("confirmarPassword").value.trim();
+
+      if (!nuevaPassword || !confirmarPassword) {
+        Toastify({
+          text: "Por favor, completa ambos campos de contraseña.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+        return;
+      }
+
+      if (nuevaPassword !== confirmarPassword) {
+        Toastify({
+          text: "Las contraseñas no coinciden.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+        return;
+      }
+
+      // Preparar los datos en formato x-www-form-urlencoded
+      const params = new URLSearchParams();
+      params.append("correo", correo);
+      params.append("codigoVerificacion", token);
+      params.append("nuevaPassword", nuevaPassword);
+      params.append("confirmarPassword", confirmarPassword);
+
+      try {
+        const response = await fetch("/VistaPrueba2/actualizarPassword", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString()
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          Toastify({
+            text: data.message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#4CAF50"
+          }).showToast();
+          setTimeout(() => {
+            window.location.href = "/VistaPrueba2/InicioSesion.html";
+          }, 3000);
+        } else {
+          const errorData = await response.json();
+          Toastify({
+            text: errorData.error || "Error al actualizar la contraseña.",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#FF0000"
+          }).showToast();
+        }
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        Toastify({
+          text: "Error al enviar la solicitud.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-white flex items-center justify-center min-h-screen">
+  <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
+    <h1 class="text-2xl font-bold text-center mb-6 text-yellow-500">Cambiar Contraseña</h1>
+    <form id="cambiarForm" onsubmit="actualizarContrasena(event)" novalidate>
+      <div class="mb-4">
+        <label for="nuevaPassword" class="block text-sm font-medium text-yellow-500 mb-2">Nueva Contraseña</label>
+        <input type="password" id="nuevaPassword" name="nuevaPassword" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" placeholder="Ingresa tu nueva contraseña" required>
+      </div>
+      <div class="mb-4">
+        <label for="confirmarPassword" class="block text-sm font-medium text-yellow-500 mb-2">Confirmar Contraseña</label>
+        <input type="password" id="confirmarPassword" name="confirmarPassword" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" placeholder="Confirma tu nueva contraseña" required>
+      </div>
+      <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-semibold hover:bg-yellow-600">
+        Actualizar Contraseña
+      </button>
+    </form>
+  </div>
+</body>
+</html>

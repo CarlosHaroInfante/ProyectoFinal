@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-gray-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administrador</title>
+  <!-- Tailwind CSS -->
+  <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+  <script src="//unpkg.com/alpinejs" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="//unpkg.com/alpinejs" defer></script>
+</head>
+<body class="h-full">
+  <div class="min-h-full">
+    <!-- Barra de navegación -->
+    <nav class="bg-gray-800">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <div class="flex items-center">
+            <div class="shrink-0">
+              <img class="w-8" src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+            </div>
+            <div class="hidden md:block">
+              <div class="ml-10 flex items-baseline space-x-4">
+                <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white" aria-current="page">Dashboard</a>
+                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Team</a>
+                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Projects</a>
+                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Calendar</a>
+                <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Reports</a>
+              </div>
+            </div>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-4 flex items-center md:ml-6">
+              <a href="panelAdmin.jsp" class="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500 mr-2">Panel de Administrador</a>
+              <a href="logout" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Cerrar Sesión</a>
+            </div>
+          </div>
+          <div class="-mr-2 flex md:hidden">
+            <button type="button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+              <span class="sr-only">Open main menu</span>
+              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Encabezado del panel -->
+    <header class="bg-white shadow-sm">
+      <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Panel de Administrador</h1>
+      </div>
+    </header>
+
+    <!-- Contenido principal: Lista de usuarios -->
+    <main>
+      <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <!-- Formulario para seleccionar el límite de usuarios a mostrar -->
+        <div class="mb-6">
+          <label for="limit" class="mr-2 font-medium">Mostrar usuarios:</label>
+          <select id="limit" class="border rounded p-1">
+            <option value="1">1</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+          </select>
+          <button id="filterBtn" class="ml-2 px-4 py-1 bg-blue-500 text-white rounded">Filtrar</button>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre Completo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody" class="divide-y divide-gray-200">
+            <!-- Se llenará dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+  // Función para renderizar los usuarios en la tabla
+  function renderUsers(users) {
+    const tbody = document.getElementById("userTableBody");
+    tbody.innerHTML = "";
+    users.forEach(user => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.idUsuario}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <img src="data:image/png;base64,${user.imagenUsuario}" alt="Imagen de ${user.nombreCompleto}" class="w-10 h-10 rounded-full">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.nombreCompleto}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.correoUsuario}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm">
+          <button class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600" onclick="modificarUsuario(${user.idUsuario})">Modificar</button>
+          <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" onclick="eliminarUsuario(${user.idUsuario})">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Funciones de ejemplo para modificar y eliminar, que reciben el id del usuario.
+  function modificarUsuario(idUsuario) {
+    console.log("Modificar usuario con id:", idUsuario);
+    // Aquí implementarás la lógica de modificación
+  }
+
+  function eliminarUsuario(idUsuario) {
+    console.log("Eliminar usuario con id:", idUsuario);
+    // Aquí implementarás la lógica de eliminación
+  }
+
+  async function fetchUsers() {
+    const limit = document.getElementById("limit").value;
+    try {
+      const response = await fetch(`/VistaPrueba2/mostrarUsuarios?limit=${limit}`);
+      if (!response.ok) throw new Error("Error al obtener los usuarios");
+      const users = await response.json();
+      renderUsers(users);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+  document.getElementById("filterBtn").addEventListener("click", fetchUsers);
+  window.addEventListener("DOMContentLoaded", fetchUsers);
+</script>
+</body>
+</html>

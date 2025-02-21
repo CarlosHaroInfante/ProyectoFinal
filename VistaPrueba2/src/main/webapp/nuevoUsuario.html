@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Usuario</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    async function registrarUsuario(event) {
+      event.preventDefault();
+      
+      // Recoger datos del formulario y eliminar espacios extra
+      const nombre = document.getElementById("nombreCompleto").value.trim();
+      const movil = document.getElementById("numeroUsuario").value.trim();
+      const correo = document.getElementById("correoUsuario").value.trim();
+      const foto = document.getElementById("imagenUsuario").files[0];
+      
+      // Validar que ningún campo esté vacío (nombre, móvil y correo)
+      if (!nombre || !movil || !correo) {
+          Toastify({
+              text: "Por favor, completa todos los campos obligatorios.",
+              duration: 3000,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "#FF0000"
+          }).showToast();
+          return;
+      }
+      
+      // Preparar FormData para enviar la solicitud
+      const formData = new FormData();
+      formData.append("accion", "registroSinPassword");
+      formData.append("nombreCompleto", nombre);
+      formData.append("numeroUsuario", movil);
+      formData.append("correoUsuario", correo);
+      formData.append("rolUsuario", "Usuario");
+      if (foto) {
+          formData.append("imagenUsuario", foto);
+      }
+      
+      console.log("Acción enviada: ", formData.get("accion"));
+      
+      // Enviar la solicitud al servlet (por ejemplo, /VistaPrueba2/registro)
+      const response = await fetch("http://localhost:8080/VistaPrueba2/registro", {
+          method: "POST",
+          body: formData
+      });
+      
+      if (response.ok) {
+          const data = await response.json();
+          Toastify({
+              text: data.message || "Usuario registrado. Revisa tu correo para el código de verificación.",
+              duration: 3000,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "#4CAF50"
+          }).showToast();
+          // Redirigir al formulario de verificación
+          setTimeout(() => {
+              window.location.href = "/VistaPrueba2/verificarCodigo.html";
+          }, 3000);
+      } else {
+          const errorData = await response.json();
+          Toastify({
+              text: "Error: " + errorData.error,
+              duration: 3000,
+              gravity: "top",
+              position: "right",
+              backgroundColor: "#FF0000"
+          }).showToast();
+      }
+    }
+
+    function previewImage(event) {
+      const input = event.target;
+      const reader = new FileReader();
+      reader.onload = function() {
+          const img = document.getElementById("preview");
+          img.src = reader.result;
+          img.style.display = "block";
+      }
+      if (input.files && input.files[0]) {
+          reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+  <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
+    <form id="registrationForm" onsubmit="registrarUsuario(event)" enctype="multipart/form-data" novalidate>
+      <input type="hidden" name="accion" value="registroSinPassword">
+      <h1 class="text-2xl font-bold text-yellow-500 mb-4">Crear una nueva cuenta</h1>
+      
+      <div class="mb-4">
+        <label for="nombreCompleto" class="block text-sm font-medium text-yellow-500 mb-2">Nombre Completo</label>
+        <input type="text" id="nombreCompleto" name="nombreCompleto" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required>
+      </div>
+      
+      <div class="mb-4">
+        <label for="numeroUsuario" class="block text-sm font-medium text-yellow-500 mb-2">Número de Teléfono</label>
+        <input type="tel" id="numeroUsuario" name="numeroUsuario" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required>
+      </div>
+      
+      <div class="mb-4">
+        <label for="correoUsuario" class="block text-sm font-medium text-yellow-500 mb-2">Correo Electrónico</label>
+        <input type="email" id="correoUsuario" name="correoUsuario" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required>
+      </div>
+      
+      <div class="mb-4">
+        <label for="imagenUsuario" class="block text-sm font-medium text-yellow-500 mb-2">Foto de Perfil</label>
+        <input type="file" id="imagenUsuario" name="imagenUsuario" accept="image/*" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" onchange="previewImage(event)">
+        <img id="preview" class="mt-2 w-32 h-32 object-cover rounded-lg hidden" alt="Vista previa de la imagen">
+      </div>
+      
+      <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-semibold hover:bg-yellow-600">
+        Registrarse
+      </button>
+    </form>
+  </div>
+</body>
+</html>
