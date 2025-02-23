@@ -115,10 +115,21 @@
   }
 
   // Funciones de ejemplo para modificar y eliminar, que reciben el id del usuario.
-  function modificarUsuario(idUsuario) {
-    console.log("Modificar usuario con id:", idUsuario);
-    // Aquí implementarás la lógica de modificación
-  }
+   function modificarUsuario(idUsuario) {
+    // Envía el id por POST sin que aparezca en la URL visible
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/VistaPrueba2/ModificarUsuario";
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "idUsuario";
+    input.value = idUsuario;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+
 
   function eliminarUsuario(idUsuario) {
 	  fetch('/VistaPrueba2/EliminarUsuario', {
