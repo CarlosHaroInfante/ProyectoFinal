@@ -6,6 +6,9 @@
   <title>Panel de Administrador</title>
   <!-- Tailwind CSS -->
   <link rel="stylesheet" href="https://cdn.tailwindcss.com">
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="//unpkg.com/alpinejs" defer></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="//unpkg.com/alpinejs" defer></script>
@@ -118,9 +121,53 @@
   }
 
   function eliminarUsuario(idUsuario) {
-    console.log("Eliminar usuario con id:", idUsuario);
-    // Aquí implementarás la lógica de eliminación
-  }
+	  fetch('/VistaPrueba2/EliminarUsuario', {
+		  method: 'POST',
+		  headers: {
+		    'Content-Type': 'application/x-www-form-urlencoded'
+		  },
+		  body: 'idUsuario=' + encodeURIComponent(idUsuario)
+		})
+
+	  .then(response => {
+	    if (!response.ok) {
+	      throw new Error('HTTP error ' + response.status);
+	    }
+	    return response.json();
+	  })
+	  .then(data => {
+	    console.log('Respuesta eliminación:', data);
+	    if (data.eliminado) {
+	      // Recargar la lista de usuarios
+	      fetchUsers();
+	      Toastify({
+	        text: '¡Usuario eliminado exitosamente!',
+	        duration: 3000,
+	        gravity: 'top',
+	        position: 'right',
+	        backgroundColor: '#4CAF50'
+	      }).showToast();
+	    } else {
+	      Toastify({
+	        text: 'No se pudo eliminar el usuario.',
+	        duration: 3000,
+	        gravity: 'top',
+	        position: 'right',
+	        backgroundColor: '#FF0000'
+	      }).showToast();
+	    }
+	  })
+	  .catch(error => {
+	    console.error('Error al eliminar usuario:', error);
+	    Toastify({
+	      text: 'Error al eliminar usuario.',
+	      duration: 3000,
+	      gravity: 'top',
+	      position: 'right',
+	      backgroundColor: '#FF0000'
+	    }).showToast();
+	  });
+	}
 
   async function fetchUsers() {
     const limit = document.getElementById("limit").value;
