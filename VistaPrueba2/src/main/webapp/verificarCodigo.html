@@ -41,6 +41,12 @@
         return;
       }
       
+      // Deshabilitar el botón y mostrar el loader
+      const submitBtn = document.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = "Actualizando... <span class='loader'></span>";
+      
       // Construir un objeto JSON con los datos
       const data = {
         correo: correo,
@@ -49,34 +55,48 @@
         confirmarPassword: confirmarPassword
       };
       
-      // Enviar la petición al endpoint de la API
-      const response = await fetch("http://localhost:9526/api/auth/actualizarPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
+      try {
+        const response = await fetch("http://localhost:9526/api/auth/actualizarPassword", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          Toastify({
+            text: result.message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#4CAF50"
+          }).showToast();
+          setTimeout(() => {
+            window.location.href = "/VistaPrueba2/InicioSesion.html";
+          }, 3000);
+        } else {
+          const errorData = await response.json();
+          Toastify({
+            text: "Error: " + errorData.error,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#FF0000"
+          }).showToast();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      } catch (error) {
+        console.error("Error en el fetch:", error);
         Toastify({
-          text: result.message,
-          duration: 3000,
-          gravity: "top",
-          position: "right",
-          backgroundColor: "#4CAF50"
-        }).showToast();
-        setTimeout(() => {
-          window.location.href = "/VistaPrueba2/InicioSesion.html";
-        }, 3000);
-      } else {
-        const errorData = await response.json();
-        Toastify({
-          text: "Error: " + errorData.error,
+          text: "Error al actualizar la contraseña",
           duration: 3000,
           gravity: "top",
           position: "right",
           backgroundColor: "#FF0000"
         }).showToast();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
       }
     }
   </script>
@@ -87,6 +107,22 @@
     }
     .animate-fade-in {
       animation: fadeIn 0.5s ease-out forwards;
+    }
+    /* Loader spinner */
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>

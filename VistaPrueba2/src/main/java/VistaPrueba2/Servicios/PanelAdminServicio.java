@@ -48,6 +48,7 @@ public class PanelAdminServicio {
                     usuario.setIdUsuario(jsonUsuario.getLong("idUsuario"));
                     usuario.setNombreCompleto(jsonUsuario.getString("nombreCompleto"));
                     usuario.setCorreoUsuario(jsonUsuario.getString("correoUsuario"));
+                    usuario.setRolUsuario(jsonUsuario.getString("rolUsuario"));
                     
                     // Decodificar la imagen en Base64 a byte[]
                     String base64Imagen = jsonUsuario.getString("imagenUsuario");

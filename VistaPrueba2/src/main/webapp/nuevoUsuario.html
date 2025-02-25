@@ -31,6 +31,11 @@
           return;
       }
       
+      // Deshabilitar el botón de envío y mostrar el loader
+      const submitBtn = document.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "Registrando... <span class='loader'></span>";
+      
       // Preparar FormData para enviar la solicitud
       const formData = new FormData();
       formData.append("accion", "registroSinPassword");
@@ -45,12 +50,13 @@
       console.log("Acción enviada: ", formData.get("accion"));
       
       // Enviar la solicitud al servlet (por ejemplo, /VistaPrueba2/registro)
-      const response = await fetch("http://localhost:8080/VistaPrueba2/registro", {
-          method: "POST",
-          body: formData
-      });
-      
-      if (response.ok) {
+      try {
+        const response = await fetch("http://localhost:8080/VistaPrueba2/registro", {
+            method: "POST",
+            body: formData
+        });
+        
+        if (response.ok) {
           const data = await response.json();
           Toastify({
               text: data.message || "Usuario registrado. Revisa tu correo para el código de verificación.",
@@ -59,11 +65,11 @@
               position: "right",
               backgroundColor: "#4CAF50"
           }).showToast();
-          // Redirigir al formulario de verificación
+          // Redirigir al formulario de verificación después de 3 segundos
           setTimeout(() => {
               window.location.href = "/VistaPrueba2/verificarCodigo.html";
           }, 3000);
-      } else {
+        } else {
           const errorData = await response.json();
           Toastify({
               text: "Error: " + errorData.error,
@@ -72,6 +78,20 @@
               position: "right",
               backgroundColor: "#FF0000"
           }).showToast();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Registrarse";
+        }
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        Toastify({
+            text: "Error al registrar el usuario",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#FF0000"
+        }).showToast();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Registrarse";
       }
     }
 
@@ -95,6 +115,22 @@
     }
     .animate-fade-in {
       animation: fadeIn 0.5s ease-out forwards;
+    }
+    /* Loader spinner */
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>

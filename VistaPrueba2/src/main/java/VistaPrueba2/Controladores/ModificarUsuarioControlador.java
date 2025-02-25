@@ -73,9 +73,9 @@ public class ModificarUsuarioControlador extends HttpServlet {
             
             usuarioDTO modificado = modificarUsuarioServicio.modificarUsuario(idUsuario, usuarioActualizado);
             if (modificado != null) {
-                response.sendRedirect("panelAdmin.jsp?mensaje=Usuario+modificado+correctamente");
+                response.sendRedirect("Admin.html?mensaje=Usuario+modificado+correctamente");
             } else {
-                response.sendRedirect("panelAdmin.jsp?error=Error+al+modificar+usuario");
+                response.sendRedirect("Admin.html?error=Error+al+modificar+usuario");
             }
         }
     }
