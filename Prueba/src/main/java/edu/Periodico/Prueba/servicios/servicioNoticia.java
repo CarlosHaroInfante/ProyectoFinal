@@ -37,6 +37,7 @@ public class servicioNoticia {
             // Usar el objeto usuario para filtrar las noticias
             return repoNoticia.findByAutor(usuario);
         }
+        
         return new ArrayList<>();
     }
 
@@ -50,7 +51,7 @@ public class servicioNoticia {
                 noticia.setAutor(autor); // Asocia el usuario encontrado con la noticia
                 return repoNoticia.save(noticia); // Guarda la noticia con el autor
             } else {
-                throw new IllegalArgumentException("El usuario con el ID proporcionado no existe.");
+                throw new IllegalArgumentException("La noticia debe tener un autor.");
             }
         } else {
             throw new IllegalArgumentException("La noticia debe tener un autor.");

@@ -20,7 +20,7 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate(); // Invalida la sesión
         }
         // Redirige al formulario de login o a otra página, según tu flujo
-        response.sendRedirect(request.getContextPath() + "/InicioSesion.html");
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
     }
 }
 

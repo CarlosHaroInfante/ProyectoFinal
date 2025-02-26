@@ -1,9 +1,17 @@
 package edu.Periodico.Prueba.controladores;
 
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import edu.Periodico.Prueba.Repositorios.repositorioUsuario;
 import edu.Periodico.Prueba.dtos.usuarioDTO;
@@ -29,7 +37,12 @@ public class controladorAuth {
         try {
             usuarioDTO usuario = servicioUsuario.autenticarUsuario(loginRequest.getCorreoUsuario(), loginRequest.getPassword());
             System.out.println("Usuario autenticado: " + usuario.getIdUsuario() + " " + usuario.getRolUsuario());
-            return ResponseEntity.ok(new LoginResponse(usuario.getIdUsuario(), "Login exitoso", usuario.getRolUsuario()));
+            String imagenUsuarioBase64 = "";
+            if (usuario.getImagenUsuario() != null) {
+                // Convertir el arreglo de bytes a Base64
+                imagenUsuarioBase64 = Base64.getEncoder().encodeToString(usuario.getImagenUsuario());
+            }
+            return ResponseEntity.ok(new LoginResponse(usuario.getIdUsuario(), "Login exitoso", usuario.getRolUsuario(), imagenUsuarioBase64));
         } catch (RuntimeException e) {
             String errorMsg = e.getMessage();
             if (errorMsg.contains("Usuario no encontrado")) {
@@ -154,32 +167,63 @@ public class controladorAuth {
             this.confirmarPassword = confirmarPassword;
         }
     }
-    // Clases internas para recibir y enviar datos en las peticiones/respuestas
+ // Clases internas para request y response
     public static class LoginRequest {
         private String correoUsuario;
         private String password;
-        public String getCorreoUsuario() { return correoUsuario; }
-        public void setCorreoUsuario(String correoUsuario) { this.correoUsuario = correoUsuario; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+        
+        public String getCorreoUsuario() {
+            return correoUsuario;
+        }
+        public void setCorreoUsuario(String correoUsuario) {
+            this.correoUsuario = correoUsuario;
+        }
+        public String getPassword() {
+            return password;
+        }
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
     
-
+    // Se ha añadido el campo imagenUsuario en la respuesta
     public static class LoginResponse {
         private long idUsuario;
         private String mensaje;
         private String rolUsuario;
-        public LoginResponse(long idUsuario, String mensaje, String rolUsuario) {
+        private String imagenUsuario;
+        
+        public LoginResponse(long idUsuario, String mensaje, String rolUsuario, String imagenUsuario) {
             this.idUsuario = idUsuario;
             this.mensaje = mensaje;
             this.rolUsuario = rolUsuario;
+            this.imagenUsuario = imagenUsuario;
         }
-        public long getIdUsuario() { return idUsuario; }
-        public void setIdUsuario(long idUsuario) { this.idUsuario = idUsuario; }
-        public String getMensaje() { return mensaje; }
-        public void setMensaje(String mensaje) { this.mensaje = mensaje; }
-        public String getRolUsuario() { return rolUsuario; }
-        public void setRolUsuario(String rolUsuario) { this.rolUsuario = rolUsuario; }
+        
+        public long getIdUsuario() {
+            return idUsuario;
+        }
+        public void setIdUsuario(long idUsuario) {
+            this.idUsuario = idUsuario;
+        }
+        public String getMensaje() {
+            return mensaje;
+        }
+        public void setMensaje(String mensaje) {
+            this.mensaje = mensaje;
+        }
+        public String getRolUsuario() {
+            return rolUsuario;
+        }
+        public void setRolUsuario(String rolUsuario) {
+            this.rolUsuario = rolUsuario;
+        }
+        public String getImagenUsuario() {
+            return imagenUsuario;
+        }
+        public void setImagenUsuario(String imagenUsuario) {
+            this.imagenUsuario = imagenUsuario;
+        }
     }
 }
 

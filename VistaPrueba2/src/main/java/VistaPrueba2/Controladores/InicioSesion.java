@@ -157,12 +157,13 @@ package VistaPrueba2.Controladores;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.util.Base64;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import VistaPrueba2.Dtos.usuarioDTO;
 import VistaPrueba2.Servicios.InicioServicio;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -186,7 +187,6 @@ public class InicioSesion extends HttpServlet {
         log.info("[INIT] InicioSesion servlet iniciado.");
     }
     
-    // Si usas fetch, el GET puede seguir haciendo forward al formulario.
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.info("[GET] Acceso al formulario de login.");
@@ -198,7 +198,7 @@ public class InicioSesion extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.info("[POST] Proceso de autenticación iniciado.");
 
-        // Asumimos que usas FormData (por lo que los parámetros llegan vía request.getParameter)
+        // Recoger parámetros del formulario
         String correo = request.getParameter("correoUsuario");
         String password = request.getParameter("password");
         log.info("[POST] Parámetros recibidos: correo = {}, password = {}", correo, password);
@@ -207,42 +207,42 @@ public class InicioSesion extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         JSONObject jsonResponse = new JSONObject();
         
-        ArrayList<Boolean> resultados = servicio.verificarUsuario(correo, password);
-        log.info("[POST] Resultados de verificación: {}", resultados);
-        HttpSession session = request.getSession();
-        if (resultados != null && resultados.size() >= 2) {
-            if (resultados.get(0)) {
-                // Usuario válido
-                session.setAttribute("usuarioLogueado", correo);
-                if (resultados.get(1)) {
-                    log.info("[POST] Login exitoso como ADMINISTRADOR.");
-                    session.setAttribute("rol", "Admin");
-                } else {
-                    log.info("[POST] Login exitoso como USUARIO.");
-                    session.setAttribute("rol", "Usuario");
-                }
-                jsonResponse.put("success", true);
-                jsonResponse.put("mensaje", "Login exitoso");
-                // En caso de éxito, puedes incluir también otros datos si lo deseas.
-                PrintWriter out = response.getWriter();
-                out.write(jsonResponse.toString());
-                out.flush();
+        // Aquí asumo que tu método verificarUsuario ahora retorna un ArrayList<Boolean>
+        // y además, en tu servicio ya has autenticado al usuario y, en ese caso, obtienes el objeto usuarioDTO.
+        // Si tienes un método que retorne el usuario (usuarioDTO), úsalo:
+        usuarioDTO usuario = servicio.autenticarUsuario(correo, password);
+        if (usuario != null) {
+            HttpSession session = request.getSession();
+            // Guarda el correo (o cualquier dato que desees)
+            session.setAttribute("usuarioLogueado", usuario.getCorreoUsuario());
+            session.setAttribute("idUsuario", usuario.getIdUsuario());
+            // Obtén la imagen y conviértela a Base64
+            if (usuario.getImagenUsuario() != null) {
+                String imagenBase64 = Base64.getEncoder().encodeToString(usuario.getImagenUsuario());
+                session.setAttribute("imagenUsuario", imagenBase64);
             } else {
-                log.warn("[POST] Credenciales incorrectas.");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                jsonResponse.put("error", "Usuario o contraseña incorrectos.");
-                PrintWriter out = response.getWriter();
-                out.write(jsonResponse.toString());
-                out.flush();
+                session.setAttribute("imagenUsuario", "");
             }
+            // Guarda el rol
+            if ("Admin".equalsIgnoreCase(usuario.getRolUsuario())) {
+                log.info("[POST] Login exitoso como ADMINISTRADOR.");
+                session.setAttribute("rol", "Admin");
+            } else {
+                log.info("[POST] Login exitoso como USUARIO.");
+                session.setAttribute("rol", "Usuario");
+            }
+            jsonResponse.put("success", true);
+            jsonResponse.put("mensaje", "Login exitoso");
+            PrintWriter out = response.getWriter();
+            out.write(jsonResponse.toString());
+            out.flush();
         } else {
-            log.error("[POST] Error en la autenticación: resultados inesperados.");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            jsonResponse.put("error", "Error en la autenticación.");
+            log.warn("[POST] Credenciales incorrectas.");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            jsonResponse.put("error", "Usuario o contraseña incorrectos.");
             PrintWriter out = response.getWriter();
             out.write(jsonResponse.toString());
             out.flush();
         }
     }
 }
-

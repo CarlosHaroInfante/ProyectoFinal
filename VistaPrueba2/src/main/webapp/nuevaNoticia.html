@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Noticia</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Toastify CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/dist/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/dist/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+  <script>
+  async function crearNoticia(event) {
+      event.preventDefault();
+      const titulo = document.getElementById("titulo").value.trim();
+      const contenido = document.getElementById("contenido").value.trim();
+      const fecha = document.getElementById("fechaPublicacion").value;
+      const imagen = document.getElementById("imagenNoticia").files[0];
+
+      if (!titulo || !contenido || !fecha) {
+        Toastify({
+          text: "Por favor, completa todos los campos obligatorios.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+        return;
+      }
+      
+      const submitBtn = document.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "Creando noticia... <span class='loader'></span>";
+
+      const formData = new FormData();
+      formData.append("titulo", titulo);
+      formData.append("contenido", contenido);
+      formData.append("fechaPublicacion", fecha);
+      if (imagen) {
+        // Si el servidor espera Base64, debes convertir el archivo a Base64.
+        const base64Image = await fileToBase64(imagen);
+        formData.append("imagenNoticia", base64Image);
+      }
+      
+      try {
+    	  const response = await fetch("http://localhost:8080/VistaPrueba2/crearNoticia", {
+    		    method: "POST",
+    		    body: formData
+    		});
+        
+        if (response.ok) {
+          const data = await response.json();
+          Toastify({
+            text: data.message || "Noticia creada exitosamente.",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#4CAF50"
+          }).showToast();
+          setTimeout(() => {
+            window.location.href = "/VistaPrueba2/Admin.html";
+          }, 3000);
+        } else {
+          const errorData = await response.json();
+          Toastify({
+            text: "Error: " + errorData.error,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#FF0000"
+          }).showToast();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Crear Noticia";
+        }
+      } catch (error) {
+        console.error("Error en el fetch:", error);
+        Toastify({
+          text: "Error al crear la noticia",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#FF0000"
+        }).showToast();
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Crear Noticia";
+      }
+    }
+    
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]); // Devuelve solo la parte Base64
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    function previewImage(event) {
+      const input = event.target;
+      const reader = new FileReader();
+      reader.onload = function() {
+          const img = document.getElementById("preview");
+          img.src = reader.result;
+          img.style.display = "block";
+      }
+      if (input.files && input.files[0]) {
+          reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
+    <form id="crearNoticiaForm" onsubmit="crearNoticia(event)" enctype="multipart/form-data" novalidate>
+      <h1 class="text-2xl font-bold text-yellow-500 mb-4 text-center">Crear Nueva Noticia</h1>
+      
+      <div class="mb-4">
+        <label for="titulo" class="block text-sm font-medium text-yellow-500 mb-2">Título</label>
+        <input type="text" id="titulo" name="titulo" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required>
+      </div>
+      
+      <div class="mb-4">
+        <label for="contenido" class="block text-sm font-medium text-yellow-500 mb-2">Contenido</label>
+        <textarea id="contenido" name="contenido" rows="4" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="fechaPublicacion" class="block text-sm font-medium text-yellow-500 mb-2">Fecha de Publicación</label>
+        <input type="date" id="fechaPublicacion" name="fechaPublicacion" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" required>
+      </div>
+      
+      <div class="mb-4">
+        <label for="imagenNoticia" class="block text-sm font-medium text-yellow-500 mb-2">Imagen de la Noticia</label>
+        <input type="file" id="imagenNoticia" name="imagenNoticia" accept="image/*" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500" onchange="previewImage(event)">
+        <img id="preview" class="mt-2 w-32 h-32 object-cover rounded-lg hidden" alt="Vista previa de la imagen">
+      </div>
+      
+      <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-semibold hover:bg-yellow-600">
+        Crear Noticia
+      </button>
+    </form>
+  </div>
+</body>
+</html>
