@@ -40,9 +40,14 @@ public class controladorUsuario {
     @PostMapping("/alta")
     public ResponseEntity<usuarioDTO> altaUsuario(@RequestBody usuarioDTO nuevoUsuario) {
         try {
-            usuarioDTO usuarioGuardado = servicio.registrarUsuarioSinPassword(nuevoUsuario);
+            // Aquí se asume que 'nuevoUsuario' ya contiene:
+            // - password vacío
+            // - tokenConfirmacion generado y asignado en la vista
+            // - confirmado = false
+            usuarioDTO usuarioGuardado = servicio.altaUsuario(nuevoUsuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioGuardado);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }*/

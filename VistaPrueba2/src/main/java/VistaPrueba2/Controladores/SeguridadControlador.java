@@ -42,6 +42,7 @@ public class SeguridadControlador implements Filter {
                             uri.endsWith("verificarCodigo.html") ||
                             uri.endsWith("nuevoUsuario.html") ||
                             uri.endsWith("registro") ||
+                            uri.endsWith("recuperarContrasenia") ||
                             uri.endsWith("recuperarContrasena") ||
                             uri.endsWith("actualizarPassword") ||
                             uri.contains("/login") ||

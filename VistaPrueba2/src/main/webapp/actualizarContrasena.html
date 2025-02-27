@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Actualizar Contraseña</title>
+  <title>Restablecer Contraseña</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Toastify CSS & JS -->
@@ -16,7 +16,7 @@
       // Extraer parámetros de la URL: correo y codigoVerificacion
       const urlParams = new URLSearchParams(window.location.search);
       const correo = urlParams.get('correo');
-      const token = urlParams.get('codigoVerificacion');  // Asegúrate de usar el nombre correcto
+      const token = urlParams.get('codigoVerificacion');
       console.log("Correo extraído:", correo);
       console.log("Token extraído:", token);
 
@@ -63,7 +63,7 @@
         if (response.ok) {
           const data = await response.json();
           Toastify({
-            text: data.message,
+            text: "Contraseña cambiada correctamente.",
             duration: 3000,
             gravity: "top",
             position: "right",
@@ -106,7 +106,7 @@
 </head>
 <body class="bg-white flex items-center justify-center min-h-screen">
   <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
-    <h1 class="text-2xl font-bold text-center mb-6 text-yellow-500">Cambiar Contraseña</h1>
+    <h1 class="text-2xl font-bold text-center mb-6 text-yellow-500">Restablecer Contraseña</h1>
     <form id="cambiarForm" onsubmit="actualizarContrasena(event)" novalidate>
       <div class="mb-4">
         <label for="nuevaPassword" class="block text-sm font-medium text-yellow-500 mb-2">Nueva Contraseña</label>

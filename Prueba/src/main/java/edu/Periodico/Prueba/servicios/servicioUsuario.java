@@ -2,20 +2,16 @@ package edu.Periodico.Prueba.servicios;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.Periodico.Prueba.Repositorios.repositorioUsuario;
-import edu.Periodico.Prueba.Util.EmailUtil;
+import edu.Periodico.Prueba.Util.FicheroLog;
 import edu.Periodico.Prueba.dtos.usuarioDTO;
 
-/*
- * Servicio que contiene la lógica de los métodos relacionados con los usuarios.
- * 17/1/2025 - CHI 
- * */
 @Service
 public class servicioUsuario {
 
@@ -40,23 +36,17 @@ public class servicioUsuario {
         }
     }
 
-    // Nuevo método: Registrar usuario sin contraseña
+    
+    // Método: Registrar usuario sin contraseña (versión API)
+    // La vista ya generó el token y configuró password = "" y confirmado = false.
     public boolean registrarUsuarioSinPassword(usuarioDTO usuario) {
-    	
-    	long count = RepUsuario.countByCorreoUsuario(usuario.getCorreoUsuario());
+        // Verificar si ya existe un usuario con ese correo
+        long count = RepUsuario.countByCorreoUsuario(usuario.getCorreoUsuario());
         if (count > 0) {
             System.out.println("El correo " + usuario.getCorreoUsuario() + " ya está registrado (count = " + count + ").");
             return false;
         }
-        	
-        // Dejar la contraseña vacía
-        usuario.setPassword("");
-
-        // Generar un código alfanumérico de 10 caracteres
-        String codigoVerificacion = generateRandomCode(10); // Método auxiliar
-        usuario.setTokenConfirmacion(codigoVerificacion);
-        usuario.setConfirmado(false);
-
+        
         // Guardar el usuario en la base de datos usando el repositorio
         usuarioDTO usuarioGuardado = RepUsuario.save(usuario);
         if (usuarioGuardado == null || usuarioGuardado.getIdUsuario() == 0) {
@@ -64,33 +54,11 @@ public class servicioUsuario {
             return false;
         }
         System.out.println("Usuario guardado correctamente: " + usuarioGuardado);
-
-        // Construir el enlace de verificación (ajusta la URL de la página de verificación de Vista)
-        String verificationLink = "http://localhost:8080/VistaPrueba2/verificarCodigo.html?correo=" + usuario.getCorreoUsuario();
-        String body = "Hola " + usuario.getNombreCompleto() + ",\n\n" +
-                      "Tu código de verificación es: " + codigoVerificacion + "\n\n" +
-                      "Haz clic en el siguiente enlace para verificar tu cuenta y establecer tu contraseña:\n" +
-                      verificationLink + "\n\n" +
-                      "Si no solicitaste este registro, ignora este mensaje.";
-
-        // Enviar correo usando EmailUtil
-        EmailUtil.sendEmail(usuario.getCorreoUsuario(), "Código de Verificación", body);
-
-        return true; // O el valor que corresponda según la lógica de guardado.
+        return true;
     }
-
-    public static String generateRandomCode(int length) {
-        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(characters.length());
-            sb.append(characters.charAt(index));
-        }
-        return sb.toString();
-    }
+            
     
-    // Nuevo método: Actualizar la contraseña (después de verificar el código)
+    // Método para actualizar la contraseña (después de verificar el código)
     public boolean actualizarPassword(String correo, String codigo, String nuevaPassword) {
         usuarioDTO usuario = RepUsuario.findByCorreoUsuario(correo); 
         if (usuario != null && usuario.getTokenConfirmacion() != null) {
@@ -109,32 +77,31 @@ public class servicioUsuario {
         }
         return false;
     }
-
-
     
     // Método para confirmar el usuario a partir del token
     public boolean confirmarUsuario(String token) {
-        // Buscar usuario por token
+        System.out.println("Confirmando token: " + token);
         usuarioDTO usuario = RepUsuario.findByTokenConfirmacion(token);
-
         if (usuario == null) {
             System.out.println("No se encontró usuario para el token: " + token);
             return false;
         }
-
         if (usuario.isConfirmado()) {
             System.out.println("El usuario ya se encuentra confirmado.");
             return false;
         }
-
-        // Actualizar el estado a confirmado e invalidar el token
+        System.out.println("Usuario encontrado: " + usuario.getNombreCompleto() + ", token: " + usuario.getTokenConfirmacion());
+        
         usuario.setConfirmado(true);
         usuario.setTokenConfirmacion(null);
-
-        // Guardar los cambios en la base de datos
-        RepUsuario.save(usuario);
-        System.out.println("Usuario confirmado correctamente con token: " + token);
-        return true;
+        usuarioDTO actualizado = RepUsuario.save(usuario);
+        if (actualizado != null && actualizado.isConfirmado() && actualizado.getTokenConfirmacion() == null) {
+            System.out.println("Usuario confirmado correctamente con token: " + token);
+            return true;
+        } else {
+            System.out.println("Error al confirmar el usuario.");
+            return false;
+        }
     }
 
     public boolean eliminarUsuarioPorId(Long idUsuario) {
@@ -155,7 +122,6 @@ public class servicioUsuario {
             usuario.setNumeroUsuario(usuarioActualizado.getNumeroUsuario());
             usuario.setCorreoUsuario(usuarioActualizado.getCorreoUsuario());
             usuario.setRolUsuario(usuarioActualizado.getRolUsuario());
-            // Si se proporciona una nueva contraseña, encriptarla
             if (usuarioActualizado.getPassword() != null && !usuarioActualizado.getPassword().isEmpty()) {
                 String contrasenaEncriptada = encriptarContrasenya(usuarioActualizado.getPassword());
                 usuario.setPassword(contrasenaEncriptada);
@@ -171,19 +137,14 @@ public class servicioUsuario {
     
     public usuarioDTO autenticarUsuario(String correoUsuario, String password) {
         usuarioDTO usuario = RepUsuario.findByCorreoUsuario(correoUsuario);
-        
         System.out.println(correoUsuario);
         System.out.println(password);
-
-        
         if (usuario == null) {
             throw new RuntimeException("Usuario no encontrado");
         }
-        // Si la contraseña almacenada está encriptada, se debe encriptar el valor recibido y comparar.
         if (!password.equals(usuario.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
         return usuario;
     }
 }
-

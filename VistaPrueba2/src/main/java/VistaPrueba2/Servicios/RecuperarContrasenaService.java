@@ -10,10 +10,10 @@ import org.json.JSONObject;
 public class RecuperarContrasenaService {
 
     // Este método hace una llamada a la API para enviar el correo de recuperación.
-    public boolean enviarCorreoRecuperacion(String correo) {
+    public boolean enviarCorreoRecuperacion(String correoUsuario) {
         try {
             // Construir la URL de la API de recuperación (ajusta puerto y context path)
-            String apiUrl = "http://localhost:9526/api/auth/recuperarContrasena";
+            String apiUrl = "http://localhost:9526/api/auth/controladorRecuperarContrasena";
             URL url = new URL(apiUrl);
             HttpURLConnection conexion = (HttpURLConnection) url.openConnection();
             conexion.setRequestMethod("POST");
@@ -22,7 +22,7 @@ public class RecuperarContrasenaService {
 
             // Crear el JSON con el correo
             JSONObject json = new JSONObject();
-            json.put("correo", correo);
+            json.put("correoUsuario", correoUsuario);
 
             try (OutputStream os = conexion.getOutputStream()) {
                 os.write(json.toString().getBytes("UTF-8"));

@@ -1,7 +1,6 @@
 package VistaPrueba2.Controladores;
 
 import java.io.IOException;
-
 import VistaPrueba2.Servicios.RegistroServicio;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,15 +25,8 @@ public class ConfirmacionCorreo extends HttpServlet {
         String token = request.getParameter("token");
 
         if (token != null && !token.isEmpty()) {
-            // Lógica para confirmar al usuario según el token.
-            // Por ejemplo: boolean confirmado = servicio.confirmarUsuario(token);
-            // Asegúrate de implementar este método en tu servicio para:
-            // 1. Verificar que el token exista y sea válido (y no expirado si decides implementar expiración).
-            // 2. Actualizar el estado del usuario (por ejemplo, activar la cuenta).
             boolean confirmado = servicio.confirmarUsuario(token);
-
             if (confirmado) {
-                // Redirigir a la página de inicio (index.jsp)
                 response.sendRedirect(request.getContextPath() + "/index.jsp");
             } else {
                 response.getWriter().write("El token es inválido o ha expirado.");
@@ -44,4 +36,3 @@ public class ConfirmacionCorreo extends HttpServlet {
         }
     }
 }
-

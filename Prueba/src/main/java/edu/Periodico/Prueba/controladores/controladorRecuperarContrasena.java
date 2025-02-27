@@ -6,10 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.Periodico.Prueba.Repositorios.repositorioUsuario;
+import edu.Periodico.Prueba.dtos.usuarioDTO;
 import edu.Periodico.Prueba.servicios.servicioRecuperarContrasena;
 
 @CrossOrigin(origins = "http://localhost:8080")
@@ -17,44 +20,34 @@ import edu.Periodico.Prueba.servicios.servicioRecuperarContrasena;
 @RequestMapping("/api/auth")
 public class controladorRecuperarContrasena {
 
-    
-	@Autowired
+    @Autowired
     private servicioRecuperarContrasena ServicioRecuperarContraseña;
+    
+    @Autowired
+    private repositorioUsuario repositorioUsu;
 
- // Endpoint para enviar el correo de recuperación
-	@PostMapping("/recuperarContrasena")
-    public ResponseEntity<?> recuperarContrasena(@RequestBody RecuperarContrasenaRequest request) {
-        boolean exito = ServicioRecuperarContraseña.recuperarContrasena(request.getCorreo());
-        if (exito) {
-            return ResponseEntity.ok("{\"success\": true, \"message\":\"Correo de recuperación enviado.\"}");
-        } else {
+    // Endpoint para enviar el correo de recuperación (este endpoint se invoca cuando se solicita restablecer la contraseña)
+    @PutMapping("/actualizarTokenRecuperacion")
+    public ResponseEntity<?> actualizarTokenRecuperacion(@RequestBody TokenUpdateRequest request) {
+        usuarioDTO usuario = repositorioUsu.findByCorreoUsuario(request.getCorreoUsuario());
+        if (usuario == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body("{\"error\":\"El correo no existe o hubo un error.\"}");
+                                 .body("{\"error\":\"El usuario no existe.\"}");
         }
+        usuario.setTokenConfirmacion(request.getTokenConfirmacion());
+        usuario.setConfirmado(request.isConfirmado());
+        usuario = repositorioUsu.save(usuario);
+        return ResponseEntity.ok("{\"success\": true, \"message\":\"Token actualizado.\"}");
     }
     
-    // Endpoint exclusivo para actualizar la contraseña en el flujo de recuperación
-    @PostMapping("/actualizarContrasenaRecuperacion")
-    public ResponseEntity<?> actualizarContrasenaRecuperacion(@RequestBody ActualizarContrasenaRecuperacionRequest request) {
-    	// Validar que se han enviado las contraseñas y que coinciden
-        if (request.getNuevaPassword() == null || request.getConfirmarPassword() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"error\":\"Faltan datos de la contraseña.\"}");
-        }
-        if (!request.getNuevaPassword().equals(request.getConfirmarPassword())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"error\":\"Las contraseñas no coinciden.\"}");
-        }
-        
-        // Llamar al servicio exclusivo para actualizar la contraseña de recuperación
-        String apiResponse = ServicioRecuperarContraseña.actualizarContrasenaRecuperacion(
+    @PostMapping("/actualizarContrasenaSinToken")
+    public ResponseEntity<?> actualizarContrasenaSinToken(@RequestBody ActualizarContrasenaRecuperacionRequest request) {
+        String apiResponse = ServicioRecuperarContraseña.actualizarContrasenaSinToken(
             request.getCorreo(),
-            request.getCodigoVerificacion(),
             request.getNuevaPassword(),
             request.getConfirmarPassword()
         );
         
-        // Parsear la respuesta JSON para verificar si "success" es true
         JSONObject jsonResp = new JSONObject(apiResponse);
         if (jsonResp.optBoolean("success", false)) {
             return ResponseEntity.ok(jsonResp.toString());
@@ -85,5 +78,30 @@ public class controladorRecuperarContrasena {
         public void setNuevaPassword(String nuevaPassword) { this.nuevaPassword = nuevaPassword; }
         public String getConfirmarPassword() { return confirmarPassword; }
         public void setConfirmarPassword(String confirmarPassword) { this.confirmarPassword = confirmarPassword; }
+    }
+    
+    public static class TokenUpdateRequest {
+        private String correoUsuario;
+        private String tokenConfirmacion;
+        private boolean confirmado;
+        
+        public String getCorreoUsuario() {
+            return correoUsuario;
+        }
+        public void setCorreoUsuario(String correoUsuario) {
+            this.correoUsuario = correoUsuario;
+        }
+        public String getTokenConfirmacion() {
+            return tokenConfirmacion;
+        }
+        public void setTokenConfirmacion(String tokenConfirmacion) {
+            this.tokenConfirmacion = tokenConfirmacion;
+        }
+        public boolean isConfirmado() {
+            return confirmado;
+        }
+        public void setConfirmado(boolean confirmado) {
+            this.confirmado = confirmado;
+        }
     }
 }
