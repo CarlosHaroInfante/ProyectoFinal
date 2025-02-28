@@ -7,8 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import edu.Periodico.Prueba.dtos.plantillaDTO;
 
-@Repository
+/*
+ * Repositorio que contiene los filtros mediante se busca la clasificación.
+ * 17/1/2025 - CHI 
+ * */
 
+@Repository
 public interface repositorioPlantilla extends JpaRepository<plantillaDTO, Long> {
 	
 	List<plantillaDTO> findByEquipo_IdEquipo(long idEquipo);

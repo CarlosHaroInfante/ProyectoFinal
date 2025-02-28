@@ -1,3 +1,4 @@
+
 package VistaPrueba2.Utils;
 
 import java.util.Properties;

@@ -13,7 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 /*
- * Dto que contiene los datos de la tabla de clasificación.
+ * Dto que contiene los datos de la tabla de equipo.
  * 17/1/2025 - CHI 
  * */
 @Entity
@@ -36,7 +36,7 @@ public class equipoDTO {
 
     // Relación 1-N con Plantilla
     @OneToMany(mappedBy = "equipo", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference // Permite serializar la lista de jugadores correctamente
     private List<plantillaDTO> plantilla;
 
     // Relación 1-N con Clasificación

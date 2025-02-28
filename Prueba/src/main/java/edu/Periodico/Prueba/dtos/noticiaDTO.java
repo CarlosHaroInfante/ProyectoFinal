@@ -13,6 +13,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/*
+ * Dto que contiene los datos de la tabla de noticias.
+ * 17/1/2025 - CHI 
+ * */
 @Entity
 @Table(name = "noticia", schema="Periodico")
 public class noticiaDTO {

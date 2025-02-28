@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Toastify CSS & JS -->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script>
     async function loginUsuario(event) {
       event.preventDefault();
@@ -16,7 +16,7 @@
       // Recoger datos y quitar espacios en blanco
       const correo = document.getElementById("correoUsuario").value.trim();
       const password = document.getElementById("password").value.trim();
-      
+
       // Validar que ningún campo esté vacío
       if (!correo || !password) {
         Toastify({
@@ -29,6 +29,11 @@
         return;
       }
 
+      // Deshabilitar el botón y mostrar el loader
+      const submitBtn = document.querySelector("button[type='submit']");
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "Iniciando Sesión... <span class='loader'></span>";
+
       // Crear FormData para enviar los datos
       const formData = new FormData();
       formData.append("correoUsuario", correo);
@@ -37,7 +42,7 @@
       console.log("Enviando login con correo:", correo);
 
       try {
-        // Se envía la solicitud al servlet de Vista (no a la API directamente)
+        // Enviar la solicitud al servlet (no a la API directamente)
         const res = await fetch("http://localhost:8080/VistaPrueba2/login", {
           method: "POST",
           body: formData
@@ -64,6 +69,9 @@
             position: "right",
             backgroundColor: "#FF0000"
           }).showToast();
+          // Reactivar el botón para permitir reintentar
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Iniciar Sesión";
         }
       } catch (error) {
         console.error("Error en el fetch:", error);
@@ -74,6 +82,9 @@
           position: "right",
           backgroundColor: "#FF0000"
         }).showToast();
+        // Reactivar el botón si ocurre un error
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Iniciar Sesión";
       }
     }
 
@@ -86,21 +97,45 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
+      // Adjuntar el evento submit al formulario con id "loginForm"
       document.getElementById("loginForm").addEventListener("submit", loginUsuario);
+      // Agregar listener a todos los inputs para eliminar mensajes de error al escribir
       document.querySelectorAll("input").forEach(input => {
         input.addEventListener("input", removeError);
       });
     });
   </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    /* Loader spinner */
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 5px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
-<body  class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen">
   <div class="bg-black rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
-    <!-- Título en amarillo -->
     <h2 class="text-2xl font-bold text-yellow-500 mb-8">Iniciar Sesión</h2>
-    <!-- Se omite el atributo action para que fetch maneje la sumisión -->
     <form id="loginForm" method="post" novalidate>
       <div>
-        <!-- Label en amarillo -->
         <label for="correoUsuario" class="block text-yellow-500 font-semibold mb-2">Correo</label>
         <input 
           type="email" 
@@ -112,7 +147,6 @@
         <p class="text-red-500 text-sm mt-2 hidden" id="correoUsuarioError">Introduce un correo válido.</p>
       </div>
       <div>
-        <!-- Label en amarillo -->
         <label for="password" class="block text-yellow-500 font-semibold mb-2">Contraseña</label>
         <input 
           type="password" 
@@ -124,34 +158,20 @@
         <p class="text-red-500 text-sm mt-2 hidden" id="passwordError">Introduce tu contraseña.</p>
       </div>
       <br><br>
-      <!-- Enlace "¿Has olvidado tu contraseña?" en amarillo -->
       <p class="text-center text-yellow-500 mt-4">
         <a href="recuperacionContrasenia.html" class="font-semibold hover:text-yellow-600 transition-colors duration-300">
           ¿Has olvidado tu contraseña?
         </a>
       </p>
       <br><br>
-      <!-- Botón en amarillo -->
       <button type="submit" class="w-full bg-yellow-500 text-black py-3 rounded-lg font-semibold hover:bg-yellow-600">
         Iniciar Sesión
       </button>
     </form>
-    <!-- Texto en blanco y enlace "Regístrate" en amarillo -->
     <p class="text-center text-white mt-6">
       ¿No tienes cuenta? 
       <a href="nuevoUsuario.html" class="font-semibold text-yellow-500 hover:text-yellow-600">Regístrate</a>
     </p>
   </div>
-
-  <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.5s ease-out forwards;
-    }
-  </style>
 </body>
 </html>
-

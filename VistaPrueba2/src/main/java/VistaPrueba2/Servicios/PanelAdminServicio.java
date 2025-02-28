@@ -8,14 +8,32 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import VistaPrueba2.Dtos.usuarioDTO;
+import VistaPrueba2.Utils.FicheroLogVista;
 
+/**
+ * Servicio para obtener usuarios para el panel de administración.
+ * <p>
+ * Este servicio se encarga de enviar una solicitud GET al endpoint de la API para obtener todos los usuarios en formato JSON,
+ * deserializar la respuesta y construir una lista de objetos {@code usuarioDTO}. Además, se puede limitar el número de usuarios retornados.
+ * </p>
+ * 27/02/2025 - CHI
+ */
 public class PanelAdminServicio {
 
+    /**
+     * Obtiene la lista de usuarios desde la API.
+     * <p>
+     * Realiza una solicitud HTTP GET al endpoint que retorna todos los usuarios, deserializa la respuesta JSON y construye
+     * una lista de objetos {@code usuarioDTO}. Si se especifica un límite mayor que 0, se retorna únicamente esa cantidad de usuarios.
+     * </p>
+     * 27/02/2025 - CHI
+     *
+     * @param limit El número máximo de usuarios a retornar. Si es 0 o mayor que el tamaño total, se retornan todos los usuarios.
+     * @return Un {@code ArrayList} de {@code usuarioDTO} con los usuarios obtenidos de la API.
+     */
     public ArrayList<usuarioDTO> obtenerUsuarios(int limit) {
         ArrayList<usuarioDTO> lista = new ArrayList<>();
         try {
@@ -27,6 +45,7 @@ public class PanelAdminServicio {
             conexion.setRequestProperty("Accept", "application/json");
 
             int responseCode = conexion.getResponseCode();
+            FicheroLogVista.logInfo("PanelAdminServicio: Código de respuesta al obtener usuarios: " + responseCode);
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(conexion.getInputStream(), StandardCharsets.UTF_8));
@@ -39,7 +58,7 @@ public class PanelAdminServicio {
 
                 // Parsear el JSON recibido
                 JSONArray jsonArray = new JSONArray(respuesta.toString());
-                System.out.println("Usuarios obtenidos: " + jsonArray);
+                FicheroLogVista.logInfo("PanelAdminServicio: Usuarios obtenidos: " + jsonArray);
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonUsuario = jsonArray.getJSONObject(i);
@@ -52,13 +71,15 @@ public class PanelAdminServicio {
                     
                     // Decodificar la imagen en Base64 a byte[]
                     String base64Imagen = jsonUsuario.getString("imagenUsuario");
-                    byte[] imagenBytes = Base64.getDecoder().decode(base64Imagen);
-                    usuario.setImagenUsuario(imagenBytes);
-
+                    if (base64Imagen != null && !base64Imagen.isEmpty()) {
+                        byte[] imagenBytes = Base64.getDecoder().decode(base64Imagen);
+                        usuario.setImagenUsuario(imagenBytes);
+                    }
+                    
                     lista.add(usuario);
                 }
             } else {
-                System.out.println("Error al obtener usuarios. Código de respuesta: " + responseCode);
+                FicheroLogVista.logError("PanelAdminServicio: Error al obtener usuarios. Código de respuesta: " + responseCode, null);
             }
 
             // Aplicar límite si es necesario
@@ -66,10 +87,9 @@ public class PanelAdminServicio {
                 lista = new ArrayList<>(lista.subList(0, limit));
             }
         } catch (Exception e) {
-            System.out.println("ERROR - PanelAdminServicio - obtenerUsuarios: " + e);
-            e.printStackTrace();
+            FicheroLogVista.logError("PanelAdminServicio: ERROR en obtenerUsuarios", e);
         }
-        System.out.println("Número total de usuarios: " + lista.size());
+        FicheroLogVista.logInfo("PanelAdminServicio: Número total de usuarios: " + lista.size());
         return lista;
     }
 }

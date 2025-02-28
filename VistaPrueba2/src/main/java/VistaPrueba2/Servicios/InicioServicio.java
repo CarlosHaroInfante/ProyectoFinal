@@ -9,17 +9,30 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import VistaPrueba2.Dtos.usuarioDTO;
 
+/**
+ * Servicio para la autenticación de usuarios.
+ * <p>
+ * Este servicio proporciona métodos para encriptar contraseñas, verificar usuarios y autenticar usuarios,
+ * comunicándose con un endpoint de la API para el login.
+ * </p>
+ * 27/02/2025 - CHI
+ */
 public class InicioServicio {
     
     private static final Logger log = LoggerFactory.getLogger(InicioServicio.class);
 
+    /**
+     * Encripta la contraseña utilizando el algoritmo SHA-256.
+     * 
+     * @param password La contraseña a encriptar.
+     * @return La contraseña encriptada en formato hexadecimal.
+     * @throws RuntimeException Si el algoritmo SHA-256 no está disponible.
+     */
     public String encriptarContrasenya(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -37,6 +50,18 @@ public class InicioServicio {
         }
     }
 
+    /**
+     * Verifica la autenticación del usuario enviando una solicitud POST a la API.
+     * <p>
+     * Envía un JSON con el correo y la contraseña encriptada al endpoint de login, y analiza la respuesta
+     * para determinar si el usuario es válido y si es administrador.
+     * </p>
+     * 
+     * @param correo   El correo del usuario.
+     * @param password La contraseña del usuario.
+     * @return Un ArrayList de Boolean donde el primer elemento indica si el usuario es válido y el segundo
+     *         indica si el usuario es administrador.
+     */
     public ArrayList<Boolean> verificarUsuario(String correo, String password) {
         ArrayList<Boolean> arrayList = new ArrayList<>();
         try {
@@ -103,8 +128,18 @@ public class InicioServicio {
         }
         return arrayList;
     }
-    
- // NUEVO MÉTODO: Autenticar y obtener el objeto usuarioDTO
+
+    /**
+     * Autentica al usuario y retorna el objeto usuarioDTO.
+     * <p>
+     * Envía una solicitud POST a la API con el correo y la contraseña encriptada. Si la respuesta es exitosa,
+     * crea y retorna un objeto usuarioDTO con la información del usuario. En caso de error, retorna null.
+     * </p>
+     * 
+     * @param correo   El correo del usuario.
+     * @param password La contraseña del usuario.
+     * @return El objeto usuarioDTO autenticado, o null si la autenticación falla.
+     */
     public usuarioDTO autenticarUsuario(String correo, String password) {
         try {
             URL url = new URL("http://localhost:9526/api/auth/login");
@@ -146,7 +181,6 @@ public class InicioServicio {
                 // Supongamos que la API retorna la imagen en Base64 en la clave "imagenUsuario"
                 String imagenBase64 = jsonResponse.optString("imagenUsuario", "");
                 if (!imagenBase64.isEmpty()) {
-                    // Convertir la cadena Base64 a bytes si tu DTO almacena byte[]
                     byte[] imagenBytes = Base64.getDecoder().decode(imagenBase64);
                     usuario.setImagenUsuario(imagenBytes);
                 }

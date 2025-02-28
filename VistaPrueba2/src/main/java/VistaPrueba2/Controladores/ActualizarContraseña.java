@@ -1,79 +1,3 @@
-/*package VistaPrueba2.Controladores;
-
-import java.io.IOException;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import VistaPrueba2.Servicios.CambioContraseña;
-
-@WebServlet("/actualizarPassword")
-public class ActualizarContraseña extends HttpServlet {
-
-    private CambioContraseña cambioContraseña;
-
-    @Override
-    public void init() throws ServletException {
-        this.cambioContraseña = new CambioContraseña();
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Recoger parámetros del formulario
-        String correo = request.getParameter("correo");
-        String codigo = request.getParameter("codigoVerificacion");
-        String nuevaPassword = request.getParameter("nuevaPassword");
-        String confirmarPassword = request.getParameter("confirmarPassword");
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-
-        // Validar que las contraseñas coinciden
-        if (nuevaPassword == null || confirmarPassword == null || !nuevaPassword.equals(confirmarPassword)) {
-            response.setContentType("text/plain");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"error\":\"Las contraseñas no coinciden o faltan datos.\"}");
-            return;
-        }
-        
-        // Llamar al servicio que a su vez invoca al endpoint de la API
-        try {
-            String apiResponse = cambioContraseña.actualizarPassword(correo, codigo, nuevaPassword, confirmarPassword);
-            // Puedes analizar apiResponse si contiene un mensaje de éxito o error.
-            // Si es exitoso, redirige a la página InicioSesion.html
-            /*if (apiResponse.toLowerCase().contains("Código Incorrecto")) {
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"error\":\"" + apiResponse + "\"}");
-            } else {
-                // Si el código es correcto y la contraseña se actualizó, redirigir a la página InicioSesion.html
-                response.sendRedirect(request.getContextPath() + "/InicioSesion.html");
-            }
-            
-            // Supongamos que la API devuelve un JSON con "success":true en caso de éxito,
-            // o un JSON con "error": "El código de verificación es incorrecto." en caso de fallo.
-            if (apiResponse.toLowerCase().contains("\"success\":true")) {
-                // En caso de éxito, enviamos el mensaje para que el front-end lo procese
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write(apiResponse);
-                // (El front-end se encargará de redirigir a la página de inicio de sesión)
-            } else {
-                // Si el código no coincide o hubo otro error, no se redirige
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(apiResponse);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setContentType("text/plain");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Error al actualizar la contraseña: " + e.getMessage());
-        }
-    }
-}*/
 package VistaPrueba2.Controladores;
 
 import java.io.IOException;
@@ -84,21 +8,50 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import VistaPrueba2.Servicios.CambioContraseña;
+import VistaPrueba2.Utils.FicheroLogVista;
 
+/**
+ * Servlet para actualizar la contraseña del usuario.
+ * <p>
+ * Este servlet recoge los parámetros del formulario, valida que las contraseñas coincidan, y llama al servicio
+ * de cambio de contraseña. En caso de éxito, retorna la respuesta de la API; en caso de error, retorna un mensaje
+ * de error.
+ * </p>
+ * 27/02/2025 - CHI
+ */
 @WebServlet("/actualizarPassword")
 public class ActualizarContraseña extends HttpServlet {
 
     private CambioContraseña cambioContraseña;
 
+    /**
+     * Inicializa el servlet y crea una instancia del servicio CambioContraseña.
+     * 27/02/2025 - CHI
+     */
     @Override
     public void init() throws ServletException {
         this.cambioContraseña = new CambioContraseña();
+        FicheroLogVista.logInfo("Inicializando ActualizarContraseña servlet.");
     }
 
+    /**
+     * Procesa las solicitudes POST para actualizar la contraseña.
+     * <p>
+     * Recoge los parámetros del formulario (correo, código de verificación, nueva contraseña y confirmación),
+     * valida que las contraseñas coincidan y llama al servicio para actualizar la contraseña. Devuelve la respuesta
+     * de la API en formato JSON.
+     * </p>
+     * 
+     * @param request  Objeto HttpServletRequest que contiene la solicitud.
+     * @param response Objeto HttpServletResponse para enviar la respuesta.
+     * @throws ServletException Si ocurre un error en el servlet.
+     * @throws IOException      Si ocurre un error de entrada/salida.
+     * 27/02/2025 - CHI
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Recoger parámetros del formulario
+        // Recoger parámetros del formulario.
         String correo = request.getParameter("correo");
         String codigo = request.getParameter("codigoVerificacion"); // Asegúrate de que aquí se llame "codigoVerificacion"
         String nuevaPassword = request.getParameter("nuevaPassword");
@@ -107,33 +60,27 @@ public class ActualizarContraseña extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        System.out.println("Correo recibido: " + correo);
-        System.out.println("Código recibido: " + codigo);
-        System.out.println("Nueva contraseña recibida: " + nuevaPassword);
-        System.out.println("Confirmar contraseña recibida: " + confirmarPassword);
-
-        // Validar que se han enviado ambas contraseñas y que coinciden
+        FicheroLogVista.logInfo("ActualizarContraseña: Correo recibido: " + correo);
+        FicheroLogVista.logInfo("ActualizarContraseña: Código recibido: " + codigo);
+        
+        // Validar que se han enviado ambas contraseñas y que coinciden.
         if (nuevaPassword == null || confirmarPassword == null || !nuevaPassword.equals(confirmarPassword)) {
+            FicheroLogVista.logInfo("ActualizarContraseña: Validación fallida, contraseñas no coinciden o faltan datos.");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\":\"Las contraseñas no coinciden o faltan datos.\"}");
             return;
         }
 
         try {
-            // Llamar al servicio que actualiza la contraseña
+            // Llamar al servicio que actualiza la contraseña.
             String apiResponse = cambioContraseña.actualizarPassword(correo, codigo, nuevaPassword, confirmarPassword);
-            // Imprimir la respuesta para depurar
-            System.out.println("API response: " + apiResponse);
-            
-            // Aquí, en lugar de condicionar según el contenido exacto, se asume que
-            // si el método no lanza excepción, la operación fue exitosa.
+            FicheroLogVista.logInfo("ActualizarContraseña: API response: " + apiResponse);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(apiResponse);
         } catch (Exception e) {
-            e.printStackTrace();
+            FicheroLogVista.logError("ActualizarContraseña: Error al actualizar la contraseña", e);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("{\"error\":\"Error al actualizar la contraseña: " + e.getMessage() + "\"}");
         }
     }
 }
-

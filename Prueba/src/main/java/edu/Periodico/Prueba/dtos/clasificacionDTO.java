@@ -29,7 +29,7 @@ public class clasificacionDTO {
 
     @ManyToOne
     @JoinColumn(name = "equipo_id", referencedColumnName = "id_equipo", nullable = false)
-    @JsonBackReference
+    @JsonBackReference // Se utiliza para evitar ciclos en la serialización JSON. Ignora este campo cuando se serializa la entidad, trabajando junto a @JsonManagedReference en el lado opuesto.
     private equipoDTO equipo;
 
     

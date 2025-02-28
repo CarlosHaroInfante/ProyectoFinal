@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 
 import edu.Periodico.Prueba.dtos.equipoDTO;
 
+/*
+ * Repositorio que contiene los filtros mediante se busca el equipo.
+ * 17/1/2025 - CHI 
+ * */
 @Repository
 public interface repositorioEquipo extends JpaRepository<equipoDTO, Long>{
 	

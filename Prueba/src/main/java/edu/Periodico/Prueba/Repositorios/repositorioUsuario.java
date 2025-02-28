@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import edu.Periodico.Prueba.dtos.usuarioDTO;
 
 /*
- * Repositorio que contiene los filtros mediante se busca el/los usuario/s.
+ * Repositorio que contiene los filtros mediante se busca los usuarios.
  * 17/1/2025 - CHI 
  * */
 @Repository

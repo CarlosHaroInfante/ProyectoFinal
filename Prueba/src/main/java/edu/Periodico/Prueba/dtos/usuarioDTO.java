@@ -14,6 +14,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/*
+ * Dto que contiene los datos de la tabla de usuarios.
+ * 17/1/2025 - CHI 
+ * */
 @Entity
 @Table(name = "usuario", schema="Periodico")
 public class usuarioDTO {
